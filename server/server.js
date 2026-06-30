@@ -1,9 +1,23 @@
+const express = require("express");
+const http = require("http");
 const WebSocket = require("ws");
+const path = require("path");
 
 const Broadcaster = require("./live/Broadcaster");
 const TikTokConnector = require("./live/TikTokConnector");
 
-const wss = new WebSocket.Server({ port: 3000 });
+const app = express();
+
+// Servir o front-end
+app.use(express.static(path.join(__dirname, "..")));
+
+// Página inicial
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "index.html"));
+});
+
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 const broadcaster = new Broadcaster(wss);
 
@@ -11,7 +25,7 @@ const USERNAME = "cristallivegame";
 
 const tiktok = new TikTokConnector(USERNAME, broadcaster);
 
-console.log("🚀 Cristal Live Engine iniciada na porta 3000");
+console.log("🚀 FishLive iniciado");
 
 wss.on("connection", (ws) => {
 
@@ -23,22 +37,19 @@ wss.on("connection", (ws) => {
 
             const data = JSON.parse(message.toString());
 
-            console.log("📨 Evento manual:", data);
-
             broadcaster.send(data);
 
-        } catch (error) {
+        } catch (err) {
 
-            console.log("❌ Erro ao processar mensagem:", error.message);
+            console.log(err.message);
 
         }
 
     });
 
-    ws.on("close", () => {
-        console.log("❌ Cliente desconectado");
-    });
-
 });
 
-tiktok.connect();
+server.listen(3000, () => {
+    console.log("🌐 HTTP + WebSocket na porta 3000");
+    tiktok.connect();
+});
