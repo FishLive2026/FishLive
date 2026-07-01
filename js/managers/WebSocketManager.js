@@ -1,18 +1,27 @@
 export default class WebSocketManager {
 
     constructor(scene, liveEvents){
+
         this.scene = scene;
         this.liveEvents = liveEvents;
+        this.socket = null;
+
     }
 
     connect(){
 
         const protocol = location.protocol === "https:" ? "wss" : "ws";
 
-        this.socket = new WebSocket(`${protocol}://${location.host}`);
+        const url = `${protocol}://${location.host}`;
+
+        console.log("🌐 Conectando em:", url);
+
+        this.socket = new WebSocket(url);
 
         this.socket.onopen = () => {
+
             console.log("✅ Jogo conectado ao WebSocket");
+
         };
 
         this.socket.onmessage = (event) => {
@@ -39,16 +48,35 @@ export default class WebSocketManager {
                     this.liveEvents.followEvent();
                     break;
 
+                case "status":
+                    console.log("📡 Status:", data);
+                    break;
+
+                default:
+                    console.log("⚠️ Evento desconhecido:", data);
+
             }
 
         };
 
-        this.socket.onerror = (e)=>{
-            console.log("ERRO WS", e);
+        this.socket.onerror = (event) => {
+
+            console.log("❌ ERRO WEBSOCKET");
+
+            console.log(event);
+
         };
 
-        this.socket.onclose = ()=>{
-            console.log("WS FECHADO");
+        this.socket.onclose = (event) => {
+
+            console.log("❌ WS FECHADO");
+
+            console.log("Código:", event.code);
+
+            console.log("Motivo:", event.reason);
+
+            console.log("Fechamento limpo:", event.wasClean);
+
         };
 
     }
