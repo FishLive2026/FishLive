@@ -8,15 +8,12 @@ const TikTokConnector = require("./live/TikTokConnector");
 
 const app = express();
 
-// Arquivos estáticos
 app.use(express.static(path.join(__dirname, "..")));
 
-// Página principal
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "..", "index.html"));
 });
 
-// Painel Admin
 app.get("/admin", (req, res) => {
     res.redirect("/admin/");
 });
@@ -31,7 +28,6 @@ const wss = new WebSocket.Server({ server });
 const broadcaster = new Broadcaster(wss);
 
 const USERNAME = "cristallivegame";
-
 const tiktok = new TikTokConnector(USERNAME, broadcaster);
 
 console.log("🚀 FishLive iniciado");
@@ -42,18 +38,26 @@ wss.on("connection", (ws) => {
 
     ws.on("message", (message) => {
 
+        console.log("📨 Mensagem recebida:", message.toString());
+
         try {
 
             const data = JSON.parse(message.toString());
+
+            console.log("📦 JSON:", data);
 
             broadcaster.send(data);
 
         } catch (err) {
 
-            console.log(err.message);
+            console.log("❌ Erro ao processar mensagem:", err.message);
 
         }
 
+    });
+
+    ws.on("close", () => {
+        console.log("❌ Cliente desconectado");
     });
 
 });
