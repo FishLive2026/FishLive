@@ -18,6 +18,10 @@ app.get("/", (req, res) => {
 
 // Painel Admin
 app.get("/admin", (req, res) => {
+    res.redirect("/admin/");
+});
+
+app.get("/admin/", (req, res) => {
     res.sendFile(path.join(__dirname, "..", "admin", "index.html"));
 });
 
