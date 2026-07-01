@@ -8,7 +8,10 @@ export default class AudioService{
 
     create(){
 
-        this.ambient=this.scene.sound.add("ambient",{loop:true,volume:0.15});
+        this.ambient = this.scene.sound.add("ambient",{
+            loop:true,
+            volume:0.15
+        });
 
         this.pop=this.scene.sound.add("pop",{volume:0.40});
         this.comment=this.scene.sound.add("comment",{volume:0.45});
@@ -19,56 +22,60 @@ export default class AudioService{
         this.galaxy=this.scene.sound.add("galaxy",{volume:0.70});
         this.whoosh=this.scene.sound.add("whoosh",{volume:0.55});
 
-        this.ambient.play();
+        this.startAmbient();
+
+        this.scene.time.addEvent({
+
+            delay:3000,
+
+            loop:true,
+
+            callback:()=>{
+
+                if(!this.ambient.isPlaying){
+
+                    console.log("🌊 Reiniciando áudio ambiente");
+
+                    this.startAmbient();
+
+                }
+
+            }
+
+        });
 
     }
 
-    playLike(){
+    startAmbient(){
 
-        this.pop.play();
+        try{
 
-    }
+            this.scene.sound.context.resume();
 
-    playComment(){
+        }catch(e){}
 
-        this.comment.play();
+        if(!this.ambient.isPlaying){
 
-    }
+            this.ambient.play();
 
-    playFollow(){
-
-        this.follow.play();
+        }
 
     }
 
-    playGift(){
+    playLike(){ this.pop.play(); }
 
-        this.gift.play();
+    playComment(){ this.comment.play(); }
 
-    }
+    playFollow(){ this.follow.play(); }
 
-    playCoin(){
+    playGift(){ this.gift.play(); }
 
-        this.coin.play();
+    playCoin(){ this.coin.play(); }
 
-    }
+    playTreasure(){ this.treasure.play(); }
 
-    playTreasure(){
+    playGalaxy(){ this.galaxy.play(); }
 
-        this.treasure.play();
-
-    }
-
-    playGalaxy(){
-
-        this.galaxy.play();
-
-    }
-
-    playWhoosh(){
-
-        this.whoosh.play();
-
-    }
+    playWhoosh(){ this.whoosh.play(); }
 
 }
