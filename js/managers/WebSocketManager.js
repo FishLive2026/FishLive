@@ -7,7 +7,9 @@ export default class WebSocketManager {
 
     connect(){
 
-        this.socket = new WebSocket("ws://localhost:3000");
+        const protocol = location.protocol === "https:" ? "wss" : "ws";
+
+        this.socket = new WebSocket(`${protocol}://${location.host}`);
 
         this.socket.onopen = () => {
             console.log("✅ Jogo conectado ao WebSocket");
@@ -17,14 +19,11 @@ export default class WebSocketManager {
 
             console.log("📨 Mensagem recebida:", event.data);
 
-            let data = JSON.parse(event.data);
-
-            console.log("👉 Tipo:", data.type);
+            const data = JSON.parse(event.data);
 
             switch(data.type){
 
                 case "like":
-                    console.log("LIKE EXECUTADO");
                     this.liveEvents.likeEvent();
                     break;
 
