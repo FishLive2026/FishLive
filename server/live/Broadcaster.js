@@ -8,18 +8,36 @@ module.exports = class Broadcaster {
 
         const message = JSON.stringify(data);
 
-        console.log("📡 Broadcast:", message);
-        console.log("👥 Clientes conectados:", this.server.clients.size);
+        console.log("================================");
+        console.log("📡 BROADCAST");
+        console.log(message);
+        console.log("Clientes:", this.server.clients.size);
+
+        let i = 1;
 
         this.server.clients.forEach(client => {
 
-            console.log("➡️ Enviando para cliente:", client.readyState);
+            console.log(
+                `Cliente ${i} | readyState=${client.readyState}`
+            );
 
             if(client.readyState === 1){
+
+                console.log(`✅ Enviado para cliente ${i}`);
+
                 client.send(message);
+
+            }else{
+
+                console.log(`❌ Cliente ${i} ignorado`);
+
             }
 
+            i++;
+
         });
+
+        console.log("================================");
 
     }
 
