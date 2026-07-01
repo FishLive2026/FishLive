@@ -27,8 +27,7 @@ const wss = new WebSocket.Server({ server });
 
 const broadcaster = new Broadcaster(wss);
 
-const USERNAME = "cristallivegame";
-const tiktok = new TikTokConnector(USERNAME, broadcaster);
+let tiktok = null;
 
 console.log("🚀 FishLive iniciado");
 
@@ -36,28 +35,46 @@ wss.on("connection", (ws) => {
 
     console.log("✅ Cliente conectado");
 
-    ws.on("message", (message) => {
+    ws.on("message", async (message) => {
 
-        console.log("📨 Mensagem recebida:", message.toString());
+        const data = JSON.parse(message.toString());
 
-        try {
+        console.log("📨", data);
 
-            const data = JSON.parse(message.toString());
+        switch (data.type) {
 
-            console.log("📦 JSON:", data);
+            case "connect":
 
-            broadcaster.send(data);
+                console.log(`🎥 Conectando em @${data.username}`);
 
-        } catch (err) {
+                try {
 
-            console.log("❌ Erro ao processar mensagem:", err.message);
+                    if (tiktok && tiktok.connection) {
+                        await tiktok.connection.disconnect();
+                    }
+
+                } catch (e) {}
+
+                tiktok = new TikTokConnector(data.username, broadcaster);
+
+                tiktok.connect();
+
+                break;
+
+            case "reconnect":
+
+                if (tiktok) {
+                    tiktok.connect();
+                }
+
+                break;
+
+            default:
+
+                broadcaster.send(data);
 
         }
 
-    });
-
-    ws.on("close", () => {
-        console.log("❌ Cliente desconectado");
     });
 
 });
@@ -65,7 +82,5 @@ wss.on("connection", (ws) => {
 server.listen(3000, () => {
 
     console.log("🌐 HTTP + WebSocket na porta 3000");
-
-    tiktok.connect();
 
 });

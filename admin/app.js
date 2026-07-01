@@ -12,33 +12,46 @@ ws.onclose = () => {
     console.log("❌ Desconectado");
 };
 
-function send(event) {
-    console.log("📤 Enviando:", event);
+function send(event){
+    console.log("📤", event);
     ws.send(JSON.stringify(event));
 }
 
-document.getElementById("like").addEventListener("click", () => {
-    console.log("❤️ CLICK LIKE");
-    send({ type: "like" });
-});
+document.getElementById("connect").onclick = () => {
 
-document.getElementById("comment").addEventListener("click", () => {
-    console.log("💬 CLICK COMMENT");
     send({
-        type: "comment",
-        comment: "Teste"
+        type: "connect",
+        username: document.getElementById("username").value.trim()
     });
-});
 
-document.getElementById("follow").addEventListener("click", () => {
-    console.log("👤 CLICK FOLLOW");
-    send({ type: "follow" });
-});
+};
 
-document.getElementById("gift").addEventListener("click", () => {
-    console.log("🎁 CLICK GIFT");
+document.getElementById("reconnect").onclick = () => {
+
     send({
-        type: "gift",
-        giftName: "Rose"
+        type: "reconnect"
     });
-});
+
+};
+
+document.getElementById("like").onclick = () => {
+    send({ type:"like" });
+};
+
+document.getElementById("comment").onclick = () => {
+    send({
+        type:"comment",
+        comment:"Teste"
+    });
+};
+
+document.getElementById("follow").onclick = () => {
+    send({ type:"follow" });
+};
+
+document.getElementById("gift").onclick = () => {
+    send({
+        type:"gift",
+        giftName:"Rose"
+    });
+};

@@ -3,82 +3,95 @@ const { TikTokLiveConnection } = require("tiktok-live-connector");
 class TikTokConnector {
 
     constructor(username, broadcaster) {
-        this.username = username;
+
+        this.username = username.replace("@", "");
         this.broadcaster = broadcaster;
         this.connection = null;
+
     }
 
     async connect() {
 
-        console.log("Conectando na live...");
-
-        this.connection = new TikTokLiveConnection("@" + this.username, {});
-
-        this.connection.on("connected", (state) => {
-
-            console.log("🟢 LIVE CONECTADA");
-            console.log("Room ID:", state.roomId);
-
-        });
-
-        this.connection.on("like", (data) => {
-
-            console.log(`❤️ ${data.uniqueId} enviou ${data.likeCount} likes`);
-
-            this.broadcaster.send({
-                type: "like",
-                user: data.uniqueId,
-                likes: data.likeCount
-            });
-
-        });
-
-        this.connection.on("chat", (data) => {
-
-            console.log(`💬 ${data.uniqueId}: ${data.comment}`);
-
-            this.broadcaster.send({
-                type: "comment",
-                user: data.uniqueId,
-                comment: data.comment
-            });
-
-        });
-
-        this.connection.on("follow", (data) => {
-
-            console.log(`👤 ${data.uniqueId} começou a seguir`);
-
-            this.broadcaster.send({
-                type: "follow",
-                user: data.uniqueId
-            });
-
-        });
-
-        this.connection.on("gift", (data) => {
-
-            console.log(`🎁 ${data.uniqueId} enviou ${data.giftName}`);
-
-            this.broadcaster.send({
-                type: "gift",
-                user: data.uniqueId,
-                gift: data.giftName,
-                repeatCount: data.repeatCount
-            });
-
-        });
+        console.log(`🎥 Conectando em @${this.username}`);
 
         try {
 
-            await this.connection.connect();
+            this.connection = new TikTokLiveConnection(this.username);
 
-            console.log("✅ Conectado à live!");
+            this.connection.on("connected", () => {
+
+                console.log("🟢 LIVE CONECTADA");
+
+                this.broadcaster.send({
+                    type: "status",
+                    connected: true,
+                    username: this.username
+                });
+
+            });
+
+            this.connection.on("disconnected", () => {
+
+                console.log("🔴 LIVE DESCONECTADA");
+
+                this.broadcaster.send({
+                    type: "status",
+                    connected: false
+                });
+
+            });
+
+            this.connection.on("like", (data) => {
+
+                this.broadcaster.send({
+                    type: "like",
+                    likes: data.likeCount,
+                    user: data.uniqueId
+                });
+
+            });
+
+            this.connection.on("chat", (data) => {
+
+                this.broadcaster.send({
+                    type: "comment",
+                    comment: data.comment,
+                    user: data.uniqueId
+                });
+
+            });
+
+            this.connection.on("follow", (data) => {
+
+                this.broadcaster.send({
+                    type: "follow",
+                    user: data.uniqueId
+                });
+
+            });
+
+            this.connection.on("gift", (data) => {
+
+                this.broadcaster.send({
+                    type: "gift",
+                    giftName: data.giftName,
+                    repeatCount: data.repeatCount,
+                    user: data.uniqueId
+                });
+
+            });
+
+            await this.connection.connect();
 
         } catch (err) {
 
-            console.log("❌ Erro ao conectar:");
-            console.log(err);
+            console.log("❌ Erro ao conectar:", err.message);
+
+            this.broadcaster.send({
+                type: "status",
+                connected: false,
+                error: err.message
+            });
 
         }
 
