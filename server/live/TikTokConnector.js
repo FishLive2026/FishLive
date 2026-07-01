@@ -12,80 +12,72 @@ class TikTokConnector {
 
     async connect() {
 
-        console.log(`🎥 Conectando em @${this.username}`);
+        console.log("Conectando na live...");
+
+        this.connection = new TikTokLiveConnection("@" + this.username, {});
+
+        this.connection.on("connected", (state) => {
+
+            console.log("🟢 LIVE CONECTADA");
+            console.log("Room ID:", state.roomId);
+
+            this.broadcaster.send({
+                type: "status",
+                connected: true
+            });
+
+        });
+
+        this.connection.on("like", (data) => {
+
+            this.broadcaster.send({
+                type: "like",
+                user: data.uniqueId,
+                likes: data.likeCount
+            });
+
+        });
+
+        this.connection.on("chat", (data) => {
+
+            this.broadcaster.send({
+                type: "comment",
+                user: data.uniqueId,
+                comment: data.comment
+            });
+
+        });
+
+        this.connection.on("follow", (data) => {
+
+            this.broadcaster.send({
+                type: "follow",
+                user: data.uniqueId
+            });
+
+        });
+
+        this.connection.on("gift", (data) => {
+
+            this.broadcaster.send({
+                type: "gift",
+                user: data.uniqueId,
+                gift: data.giftName,
+                repeatCount: data.repeatCount
+            });
+
+        });
 
         try {
 
-            this.connection = new TikTokLiveConnection(this.username);
-
-            this.connection.on("connected", () => {
-
-                console.log("🟢 LIVE CONECTADA");
-
-                this.broadcaster.send({
-                    type: "status",
-                    connected: true,
-                    username: this.username
-                });
-
-            });
-
-            this.connection.on("disconnected", () => {
-
-                console.log("🔴 LIVE DESCONECTADA");
-
-                this.broadcaster.send({
-                    type: "status",
-                    connected: false
-                });
-
-            });
-
-            this.connection.on("like", (data) => {
-
-                this.broadcaster.send({
-                    type: "like",
-                    likes: data.likeCount,
-                    user: data.uniqueId
-                });
-
-            });
-
-            this.connection.on("chat", (data) => {
-
-                this.broadcaster.send({
-                    type: "comment",
-                    comment: data.comment,
-                    user: data.uniqueId
-                });
-
-            });
-
-            this.connection.on("follow", (data) => {
-
-                this.broadcaster.send({
-                    type: "follow",
-                    user: data.uniqueId
-                });
-
-            });
-
-            this.connection.on("gift", (data) => {
-
-                this.broadcaster.send({
-                    type: "gift",
-                    giftName: data.giftName,
-                    repeatCount: data.repeatCount,
-                    user: data.uniqueId
-                });
-
-            });
-
             await this.connection.connect();
+
+            console.log("✅ Conectado à live!");
 
         } catch (err) {
 
-            console.log("❌ Erro ao conectar:", err.message);
+            console.log("❌ Erro ao conectar:");
+            console.log(err);
 
             this.broadcaster.send({
                 type: "status",

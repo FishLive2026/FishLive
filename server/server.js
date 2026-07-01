@@ -27,7 +27,8 @@ const wss = new WebSocket.Server({ server });
 
 const broadcaster = new Broadcaster(wss);
 
-let tiktok = null;
+let username = "cristallivegame";
+let tiktok = new TikTokConnector(username, broadcaster);
 
 console.log("🚀 FishLive iniciado");
 
@@ -35,7 +36,7 @@ wss.on("connection", (ws) => {
 
     console.log("✅ Cliente conectado");
 
-    ws.on("message", async (message) => {
+    ws.on("message", (message) => {
 
         const data = JSON.parse(message.toString());
 
@@ -45,27 +46,18 @@ wss.on("connection", (ws) => {
 
             case "connect":
 
-                console.log(`🎥 Conectando em @${data.username}`);
+                username = data.username.trim();
 
-                try {
+                console.log(`🎥 Usuário selecionado: @${username}`);
 
-                    if (tiktok && tiktok.connection) {
-                        await tiktok.connection.disconnect();
-                    }
-
-                } catch (e) {}
-
-                tiktok = new TikTokConnector(data.username, broadcaster);
-
-                tiktok.connect();
+                // Por enquanto apenas guarda o usuário.
+                // Na próxima etapa faremos a reconexão sem reiniciar o servidor.
 
                 break;
 
             case "reconnect":
 
-                if (tiktok) {
-                    tiktok.connect();
-                }
+                console.log("🔄 Reconectar solicitado");
 
                 break;
 
@@ -82,5 +74,7 @@ wss.on("connection", (ws) => {
 server.listen(3000, () => {
 
     console.log("🌐 HTTP + WebSocket na porta 3000");
+
+    tiktok.connect();
 
 });
