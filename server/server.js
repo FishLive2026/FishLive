@@ -8,12 +8,17 @@ const TikTokConnector = require("./live/TikTokConnector");
 
 const app = express();
 
-// Servir o front-end
+// Arquivos estáticos
 app.use(express.static(path.join(__dirname, "..")));
 
-// Página inicial
+// Página principal
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "..", "index.html"));
+});
+
+// Painel Admin
+app.get("/admin", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "admin", "index.html"));
 });
 
 const server = http.createServer(app);
@@ -50,6 +55,9 @@ wss.on("connection", (ws) => {
 });
 
 server.listen(3000, () => {
+
     console.log("🌐 HTTP + WebSocket na porta 3000");
+
     tiktok.connect();
+
 });
